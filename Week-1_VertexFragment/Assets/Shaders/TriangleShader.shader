@@ -1,5 +1,21 @@
 Shader "Unlit/TriangleShader"
 {
+	Properties
+	{
+		_WaterColour ("Water Colour", Color) = (1, 1, 1, 1)
+		_FoamColour ("Foam Colour", Color) = (1, 1, 1, 1)
+		
+		_FoamHeight("Foam Height", Float) = 1
+		
+		_Wave1Amplitude ("Wave 1 Amplitude", Float) = 1
+		_Wave1Frequency ("Wave 1 Frequency", Float) = 1
+		
+		_Wave2Amplitude ("Wave 2 Amplitude", Float) = 1
+		_Wave2Frequency ("Wave 2 Frequency", Float) = 1
+		
+		_Wave3Amplitude ("Wave 3 Amplitude", Float) = 1
+		_Wave3Frequency ("Wave 3 Frequency", Float) = 1
+	}
 	SubShader
 	{
 		Pass
@@ -16,12 +32,32 @@ Shader "Unlit/TriangleShader"
 				float3 localPosition : TEXCOORD1;
 			};
 
+			float4 _WaterColour;
+			float4 _FoamColour;
+			float _Wave1Amplitude;
+			float _Wave1Frequency;
+			float _Wave2Amplitude;
+			float _Wave2Frequency;
+			float _Wave3Amplitude;
+			float _Wave3Frequency;
+			float _FoamHeight;
+
 			VertexData vert(VertexData input)
 			{
 				VertexData output;
 
-				output.localPosition = input.position;
-				output.position = UnityObjectToClipPos(input.position);
+				output.position = input.position;
+				
+				//alters y
+				output.position[1] += sin((_Time * _Wave1Frequency) + input.position[0]) * _Wave1Amplitude;
+				output.position[1] += sin((_Time * _Wave3Frequency) + input.position[0]) * _Wave3Amplitude;
+				output.position[1] += cos((_Time * _Wave2Frequency) + input.position[2]) * _Wave2Amplitude;
+
+				output.localPosition = output.position;
+				
+				//transform to clip space
+				output.position = UnityObjectToClipPos(output.position);
+				
 
 				return output; 
 			}
@@ -40,25 +76,13 @@ Shader "Unlit/TriangleShader"
 				float4 color;
 
 				//set colour based on height
-				if(clampedY < 0.10f)
+				if(input.localPosition[1] > _FoamHeight)
 				{
-					color = float4(1.0f, 0.96f, 0.62f, 1.0f); // baige
-				}
-				else if (clampedY < 0.40f)
-				{
-					color = float4(0.48f, 0.77f, 0.46f, 1.0f); // light green
-				}
-				else if (clampedY < 0.70f)
-				{
-					color = float4(0.10f, 0.48f, 0.19f, 1.0f); // dark green
-				}
-				else if (clampedY < 0.90f)
-				{
-					color = float4(0.45f, 0.39f, 0.34f, 1.0f); // gray
+					color = _FoamColour;
 				}
 				else
 				{
-					color = float4(1.0f, 1.0f, 1.0f, 1.0f); // white
+					color = _WaterColour;
 				}
 
 				return color;
