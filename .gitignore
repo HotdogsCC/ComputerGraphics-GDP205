@@ -7,3 +7,4 @@ Week-1_VertexFragment/Week-1_VertexFragment.sln
 /Week-1_VertexFragment/.vs
 Week-1_VertexFragment/Assembly-CSharp.csproj
 /Week-1_VertexFragment/obj
+*.csproj

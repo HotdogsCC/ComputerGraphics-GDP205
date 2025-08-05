@@ -11,6 +11,7 @@ public class MyGrid : MonoBehaviour
     Mesh mesh;
     Vector3[] vertices;
     int[] triangles;
+    private Vector2[] uv;
 
     public int xSize, zSize;
     public int width, depth;
@@ -31,8 +32,11 @@ public class MyGrid : MonoBehaviour
         // and Assign our mesh variable to it
         GetComponent<MeshFilter>().mesh = mesh;
 
-        // calculae the total number of vertices
+        // calculate the total number of vertices
         vertices = new Vector3[(xSize + 1) * (zSize + 1)];
+        
+        //vec2 array to store texture coordinates
+        uv = new Vector2[vertices.Length];
 
         // we want grid to be centered around the origin
         float halfWidth = 0.5f * width;
@@ -41,6 +45,10 @@ public class MyGrid : MonoBehaviour
         //calc distance between verts
         float dx = width / (xSize - 1.0f);
         float dz = depth / (zSize - 1.0f);
+
+        //calculate distance between each texture coordinate
+        float du = 1.0f / (xSize - 1);
+        float dv = 1.0f / (zSize - 1);
 
         int vertex = 0;
         for(int x = 0; x <= xSize; x++)
@@ -62,7 +70,11 @@ public class MyGrid : MonoBehaviour
                 }
 
                 //save the pos
-                vertices[vertex] = new Vector3(a, y, b);
+                vertices[vertex] = new Vector3(a, 0, b);
+                
+                //save texture coordinate
+                uv[vertex] = new Vector2(x * du, z * dv);
+                
                 vertex++;
             }
         }
@@ -101,6 +113,7 @@ public class MyGrid : MonoBehaviour
         mesh.Clear();
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.uv = uv;
 
         mesh.RecalculateNormals();
     }
