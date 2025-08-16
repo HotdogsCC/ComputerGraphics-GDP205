@@ -3,6 +3,7 @@ Shader "Unlit/TriangleShader"
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_height("height", Float) = 0.0
 	}
 	
 	
@@ -18,7 +19,7 @@ Shader "Unlit/TriangleShader"
 			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
-
+			float _height;
 			struct VertexData
 			{
 				float4 position : POSITION;
@@ -32,6 +33,9 @@ Shader "Unlit/TriangleShader"
 
 				output.localPosition = input.position;
 				output.uv = input.uv;
+
+				float yPos = tex2Dlod(_MainTex, float4(input.uv.xy, 0.0, 0));
+				input.position = float4(input.position.x, yPos * _height, input.position.z, 1.0f);
 				
 				output.position = UnityObjectToClipPos(input.position);
 
@@ -40,46 +44,35 @@ Shader "Unlit/TriangleShader"
 
 			float4 frag(VertexData input) : SV_TARGET
 			{
+				//get colour of texture at this pixel
 				float4 texColour = tex2D(_MainTex, input.uv);
 
-				float4 outColour = texColour;
-
-				return outColour;
-				
-				//return float4(1.0f, 0.0f, 0.0f, 1.0f);
-
-				// divide local y position by 8; results in -1 and 1
-				//float normalizedY = input.localPosition.y / 8.0f;
-
-				//use clamp to discard negative values
-				//float clampedY = clamp(normalizedY, 0.0f, 1.0f);
-
 				//create a new float4 variable for colour
-				//float4 color;
+				float4 color;
 
 				//set colour based on height
-				// if(clampedY < 0.10f)
-				// {
-				// 	color = float4(1.0f, 0.96f, 0.62f, 1.0f); // baige
-				// }
-				// else if (clampedY < 0.40f)
-				// {
-				// 	color = float4(0.48f, 0.77f, 0.46f, 1.0f); // light green
-				// }
-				// else if (clampedY < 0.70f)
-				// {
-				// 	color = float4(0.10f, 0.48f, 0.19f, 1.0f); // dark green
-				// }
-				// else if (clampedY < 0.90f)
-				// {
-				// 	color = float4(0.45f, 0.39f, 0.34f, 1.0f); // gray
-				// }
-				// else
-				// {
-				// 	color = float4(1.0f, 1.0f, 1.0f, 1.0f); // white
-				// }
-				//
-				// return color;
+				 if(texColour.r < 0.10f)
+				 {
+				 	color = float4(0.2f, 0.46f, 0.92f, 1.0f); // blue
+				 }
+				 else if (texColour.r < 0.40f)
+				 {
+				 	color = float4(0.48f, 0.77f, 0.46f, 1.0f); // light green
+				 }
+				 else if (texColour.r < 0.70f)
+				 {
+				 	color = float4(0.10f, 0.48f, 0.19f, 1.0f); // dark green
+				 }
+				 else if (texColour.r < 0.90f)
+				 {
+				 	color = float4(0.45f, 0.39f, 0.34f, 1.0f); // gray
+				 }
+				 else
+				 {
+				 	color = float4(1.0f, 1.0f, 1.0f, 1.0f); // white
+				 }
+				
+				 return color;
 					
 			}
 

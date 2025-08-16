@@ -1,6 +1,6 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Schema;
 using UnityEngine;
 
 // Requirning MeshFilter
@@ -17,10 +17,22 @@ public class MyGrid : MonoBehaviour
     public int width, depth;
 
     public float maxHeight;
+    private readonly int height = Shader.PropertyToID("_height");
 
     private void Start()
     {
+        
+        
         GenerateMesh();
+    }
+
+    private void Update()
+    {
+        PerlinNoiseTexture noiseTexture = GetComponent<PerlinNoiseTexture>();
+
+        Renderer renderer = GetComponent<Renderer>();
+        renderer.material.mainTexture = noiseTexture.GenTexture(width, depth);
+        renderer.material.SetFloat(height, 100.0f);
     }
 
     private void GenerateMesh()

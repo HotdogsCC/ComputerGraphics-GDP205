@@ -320,6 +320,7 @@ GameObject:
   - component: {fileID: 1653499584}
   - component: {fileID: 1653499583}
   - component: {fileID: 1653499582}
+  - component: {fileID: 1653499585}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -409,6 +410,23 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1653499585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653499580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b2e5648f948b4c4aa0b7e2c503046cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scale: 3
+  offset: {x: 0, y: 0}
+  persistance: 0.75
+  lacunarity: 1.5
+  octave: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
