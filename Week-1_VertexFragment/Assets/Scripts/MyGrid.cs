@@ -138,6 +138,7 @@ public class MyGrid : MonoBehaviour
 
         //generate normals
         vert = 0;
+        Vector4[] tangents = new Vector4[vertices.Length];
         int triCount = triangles.Length / 3;
 
         for (int i = 0; i < triCount; i++)
@@ -165,13 +166,41 @@ public class MyGrid : MonoBehaviour
             normals[i1] += norm;
             normals[i2] += norm;
 
+            //get texture coords
+            Vector2 uv0 = uv[i0];
+            Vector2 uv1 = uv[i1];
+            Vector2 uv2 = uv[i2];
+
+            //lines from texture coords
+            Vector2 dUV1 = uv1 - uv0;
+            Vector2 dUV2 = uv2 - uv0;
+
+            //float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+            //calculate tangent vector
+            tangents[i0].x = (dUV2.y * e1.x - dUV1.y * e2.x);
+            tangents[i0].y = (dUV2.y * e1.y - dUV1.y * e2.y);
+            tangents[i0].z = (dUV2.y * e1.z - dUV1.y * e2.z);
+
             vert += 3;
         }
 
         for (int i = 0; i < normals.Length; i++)
         {
             normals[i].Normalize();
+
+            Vector3 n = normals[i];
+            Vector3 t = tangents[i];
+
+            //gram schmidt orthogonalize
+            Vector3.OrthoNormalize(ref n, ref t);
+
+            tangents[i] = t;
+
+            //calculate two component for the tangents
+            tangents[i].w = (Vector3.Dot(Vector3.Cross(Vector3.one, Vector3.zero), Vector3.one) < 0.0f) ? -1.0f : 1.0f;
         }
+
 
 
         // clear and set verticies and triangle properties
@@ -180,6 +209,7 @@ public class MyGrid : MonoBehaviour
         mesh.triangles = triangles;
         mesh.uv = uv;
         mesh.normals = normals;
+        mesh.tangents = tangents;
 
         //mesh.RecalculateNormals();
     }

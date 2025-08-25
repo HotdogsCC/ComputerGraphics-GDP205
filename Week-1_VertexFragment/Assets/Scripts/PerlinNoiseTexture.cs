@@ -9,7 +9,7 @@ public class PerlinNoiseTexture : MonoBehaviour
     public float scale = 4.0f;
     public Vector2 offset = new(0.0f, 0.0f);
 
-    [Header("Noise Properties")] 
+    [Header("Noise Properties")]
     public float persistance = 0.5f;
     public float lacunarity = 2.0f;
     public int octave = 4;
@@ -40,15 +40,15 @@ public class PerlinNoiseTexture : MonoBehaviour
                 {
                     //for each pixel location, get noise
                     float perlinValue = GenValue(w, h, width, height, freq);
-                    
+
                     //add to value per octave
                     finalValue += perlinValue * amp;
-                    
+
                     //apply new amp and freq
                     amp *= persistance;
                     freq *= lacunarity;
                 }
-                
+
                 //store final noise in heightmap
                 heightMap[w, h] = finalValue;
 
@@ -58,7 +58,7 @@ public class PerlinNoiseTexture : MonoBehaviour
                 }
             }
         }
-        
+
         //generate the colour data from the perlin noise
         //then again, for each pixel, normalise the height
         for (int w = 0; w < width; w++)
@@ -67,17 +67,20 @@ public class PerlinNoiseTexture : MonoBehaviour
             {
                 //normalises our height between 0 and 1
                 heightMap[w, h] /= maxHeight;
-                
+
                 //makes a colour map between black (0) and white (1)
                 colorMap[h * width + w] = Color.Lerp(Color.black, Color.white, heightMap[w, h]);
-                
-                
+
+
             }
         }
 
         Texture2D tex = new Texture2D(width, height);
         tex.SetPixels(colorMap);
         tex.Apply();
+
+        //SaveTextureAsPNG(tex, "Assets/Textures/heightMap.png");
+
         return tex;
     }
 
@@ -94,5 +97,11 @@ public class PerlinNoiseTexture : MonoBehaviour
     public float GetHeight(int x, int y)
     {
         return heightMap[x, y];
+    }
+
+    public static void SaveTextureAsPNG(Texture2D _texture, string _fullPath)
+    {
+        byte[] _bytes = _texture.EncodeToPNG();
+        System.IO.File.WriteAllBytes(_fullPath, _bytes);
     }
 }
