@@ -4,6 +4,10 @@ Shader "Unlit/TriangleShader"
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_height("height", Float) = 0.0
+		_Shininess("shininess", Float) = 256.0
+		_SpecularColor("SpecularColor", Color) = (1.0, 1.0, 1.0)
+		_SpecularStrength("SpecularStrength", Range(0,1)) = 0.1
+		_AmbientStrength("AmbientStrength", Float) = 0.5
 	}
 	
 	
@@ -17,14 +21,23 @@ Shader "Unlit/TriangleShader"
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
+			#include "Lighting.cginc"
 
 			sampler2D _MainTex;
 			float _height;
+			float _Shininess;
+			float4 _SpecularColor;
+			float _SpecularStrength;
+			float _AmbientStrength;
+
+
 			struct VertexData
 			{
 				float4 position : POSITION;
+				float3 normal : NORMAL;
 				float2 uv : TEXCOORD0;
 				float3 localPosition : TEXCOORD1;
+				float3 worldPos : TEXCOORD2;
 			};
 
 			VertexData vert(VertexData input)
@@ -34,11 +47,18 @@ Shader "Unlit/TriangleShader"
 				output.localPosition = input.position;
 				output.uv = input.uv;
 
-				float yPos = tex2Dlod(_MainTex, float4(input.uv.xy, 0.0, 0));
-				input.position = float4(input.position.x, yPos * _height, input.position.z, 1.0f);
-				
-				output.position = UnityObjectToClipPos(input.position);
+				//use world to object matrix to convert vertex to local space
+				//then cast it to a 3x3 matrix and use the transpose to calculate the proper normal
+				output.normal = mul(transpose((float3x3)unity_WorldToObject), input.normal);
+				output.normal = normalize(output.normal);
 
+				//float yPos = tex2Dlod(_MainTex, float4(input.uv.xy, 0.0, 0));
+				//input.position = float4(input.position.x, yPos * _height, input.position.z, 1.0f);
+				input.position = float4(input.position.xyz, 1.0f);
+
+				output.worldPos = mul(unity_ObjectToWorld, input.position);
+
+				output.position = UnityObjectToClipPos(input.position);
 				return output; 
 			}
 
@@ -71,8 +91,38 @@ Shader "Unlit/TriangleShader"
 				 {
 				 	color = float4(1.0f, 1.0f, 1.0f, 1.0f); // white
 				 }
-				
-				 return color;
+
+				 //set albedo
+				 float4 albedo = color;
+
+				 //normalize per pixel
+				 input.normal = normalize(input.normal);
+
+				 //diffuse
+				 float3 lightDir = _WorldSpaceLightPos0.xyz;
+				 float3 lightColor = _LightColor0.rgb;
+				 float3 diffuse = saturate(dot(lightDir, input.normal)) * lightColor;
+
+				 //spec
+				 float3 viewDir = normalize(_WorldSpaceCameraPos - input.worldPos);
+
+				 //phong
+				 //float3 reflectionDir = reflect(-lightDir, input.normal);
+				 //float clampedSpecValue = saturate(dot(reflectionDir, viewDir));
+
+				 //blinn-phong
+				 float3 halfVector = normalize(lightDir + viewDir);
+				 float clampedSpecValue = saturate(dot(halfVector, input.normal));
+
+				 float specularPower = pow(clampedSpecValue, _SpecularStrength * _Shininess);
+				 float3 specular = _SpecularColor.rgb * specularPower * lightColor;
+
+				 //ambient
+				 float ambient = _AmbientStrength * lightColor;
+
+				 float3 totalColor = (diffuse + specular + ambient) * albedo;
+				  
+				 return float4(totalColor, 1.0f);
 					
 			}
 

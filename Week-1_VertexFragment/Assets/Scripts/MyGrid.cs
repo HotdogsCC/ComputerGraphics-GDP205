@@ -8,10 +8,13 @@ using UnityEngine;
 
 public class MyGrid : MonoBehaviour
 {
+    private PerlinNoiseTexture noiseTexture;
+
     Mesh mesh;
     Vector3[] vertices;
     int[] triangles;
     private Vector2[] uv;
+    private Vector3[] normals;
 
     public int xSize, zSize;
     public int width, depth;
@@ -21,7 +24,11 @@ public class MyGrid : MonoBehaviour
 
     private void Start()
     {
-        
+        noiseTexture = GetComponent<PerlinNoiseTexture>();
+
+        Renderer renderer = GetComponent<Renderer>();
+        renderer.material.mainTexture = noiseTexture.GenTexture(width, depth);
+        renderer.material.SetFloat("_height", 1.0f);
         
         GenerateMesh();
     }
@@ -50,6 +57,9 @@ public class MyGrid : MonoBehaviour
         //vec2 array to store texture coordinates
         uv = new Vector2[vertices.Length];
 
+        //vec2 to store normals
+        normals = new Vector3[vertices.Length];
+
         // we want grid to be centered around the origin
         float halfWidth = 0.5f * width;
         float halfDepth = 0.5f * depth;
@@ -74,18 +84,24 @@ public class MyGrid : MonoBehaviour
                 float b = -halfDepth + z * dz;
 
                 //generate height for the vertext
-                float y = 4.0f * (Mathf.Sin(0.5f * x) + Mathf.Cos(0.5f * z));
-                
-                if(maxHeight < y)
+                //float y = 4.0f * (Mathf.Sin(0.5f * x) + Mathf.Cos(0.5f * z));
+                float y = noiseTexture.GetHeight(x, z) * 100;
+
+                if (maxHeight < y)
                 {
                     maxHeight = y;
                 }
 
+                
+
                 //save the pos
-                vertices[vertex] = new Vector3(a, 0, b);
+                vertices[vertex] = new Vector3(a, y, b);
                 
                 //save texture coordinate
                 uv[vertex] = new Vector2(x * du, z * dv);
+
+                //init the normal
+                normals[vertex] = new Vector3(0.0f, 1.0f, 0.0f);
                 
                 vertex++;
             }
@@ -120,13 +136,51 @@ public class MyGrid : MonoBehaviour
             vert++;
         }
 
+        //generate normals
+        vert = 0;
+        int triCount = triangles.Length / 3;
+
+        for (int i = 0; i < triCount; i++)
+        {
+            //vertices of the triangle
+            int i0 = triangles[vert + 0];
+            int i1 = triangles[vert + 1];
+            int i2 = triangles[vert + 2];
+
+            //points of the vertices
+            Vector3 p0 = vertices[i0];
+            Vector3 p1 = vertices[i1];
+            Vector3 p2 = vertices[i2];
+
+            //lines forming the triangle
+            Vector3 e1 = p1 - p0;
+            Vector3 e2 = p2 - p0;
+
+            //get the normal
+            Vector3 norm = Vector3.Cross(e1, e2);
+            norm = Vector3.Normalize(norm);
+
+            //add the normals
+            normals[i0] = norm;
+            normals[i1] += norm;
+            normals[i2] += norm;
+
+            vert += 3;
+        }
+
+        for (int i = 0; i < normals.Length; i++)
+        {
+            normals[i].Normalize();
+        }
+
 
         // clear and set verticies and triangle properties
         mesh.Clear();
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uv;
+        mesh.normals = normals;
 
-        mesh.RecalculateNormals();
+        //mesh.RecalculateNormals();
     }
 }

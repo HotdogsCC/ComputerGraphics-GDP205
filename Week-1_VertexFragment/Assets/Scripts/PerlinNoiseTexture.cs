@@ -90,4 +90,9 @@ public class PerlinNoiseTexture : MonoBehaviour
 
         return value;
     }
+
+    public float GetHeight(int x, int y)
+    {
+        return heightMap[x, y];
+    }
 }
