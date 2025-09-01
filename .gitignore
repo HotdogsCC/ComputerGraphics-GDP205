@@ -8,3 +8,9 @@ Week-1_VertexFragment/Week-1_VertexFragment.sln
 Week-1_VertexFragment/Assembly-CSharp.csproj
 /Week-1_VertexFragment/obj
 *.csproj
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/Library
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/Temp
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/.vs
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/Logs
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/obj
+/LectureProjectAnimationShaders/LectureProjectAnimationShaders/UserSettings

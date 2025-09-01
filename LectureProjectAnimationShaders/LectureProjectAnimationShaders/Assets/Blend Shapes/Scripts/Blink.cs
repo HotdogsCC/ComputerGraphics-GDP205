@@ -10,7 +10,7 @@ public class Blink : MonoBehaviour
     void Start()
     {
         _animator = GetComponent<Animator>(); // Get the animator component
-        _randomInterval = Random.Range(1.0f, 3.0f);
+        _randomInterval = Random.Range(0.2f, 0.5f);
     }
 
     // Update is called once per frame
