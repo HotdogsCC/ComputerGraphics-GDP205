@@ -114,11 +114,6 @@ Shader "Custom/EnergyShield"
                 // clamp and invert
                 float intersection = 1.0 - saturate(diff);
 
-                //if(intersection > 0.5)
-                //{
-                //    discard;
-                //}
-
                 //control the thickness
                 intersection = pow(intersection, 1.0 / max(_IntersectionPower, 0.5));
 
